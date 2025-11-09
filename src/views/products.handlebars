@@ -6,7 +6,7 @@
   <p>{{this.description}}</p>
   <p><b>Precio:</b> ${{this.price}}</p>
 
-  <!--  Botón para agregar al carrito -->
+  <!-- Botón para agregar al carrito -->
   <button onclick="addToCart('{{this._id}}')">Agregar al carrito 🛒</button>
 </div>
 {{/each}}
@@ -17,17 +17,81 @@
   {{#if hasNextPage}}<a href="{{nextLink}}">Siguiente ➡️</a>{{/if}}
 </div>
 
-<script>
-async function addToCart(productId) {
-  const cartId = "6910fd582b45b333a71a863b"; // 👉 ID real del carrito que tengas
+<hr>
 
-  const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+<h2>Carrito (<span id="cart-count">0</span> items)</h2>
+<div id="mini-cart">
+  <!-- Renderizado dinámico -->
+</div>
+
+<script>
+const cartId = "6910fd582b45b333a71a863b";
+
+// Agregar producto
+async function addToCart(productId) {
+  await fetch(`/api/carts/${cartId}/products/${productId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ quantity: 1 })
-  });  
-
-  const data = await response.json();
-  alert(data.message || "Producto agregado al carrito ✅");
+  });
+  renderMiniCart();
 }
+
+// Renderizar mini carrito
+async function renderMiniCart() {
+  const res = await fetch(`/api/carts/${cartId}`);
+  const data = await res.json();
+  const cart = data.payload;
+  if (!cart || !cart.products) return;
+
+  let html = '';
+  let grandTotal = 0;
+  let totalItems = 0;
+
+  cart.products.forEach(p => {
+    const total = p.product.price * p.quantity;
+    grandTotal += total;
+    totalItems += p.quantity;
+
+    html += `
+      <div style="border:1px solid #ccc; padding:5px; margin:5px;">
+        <h4>${p.product.title}</h4>
+        <p>Precio unitario: $${p.product.price}</p>
+        <p>
+          Cantidad: 
+          <button onclick="updateQuantity('${p.product._id}', ${p.quantity - 1})">-</button>
+          ${p.quantity}
+          <button onclick="updateQuantity('${p.product._id}', ${p.quantity + 1})">+</button>
+        </p>
+        <p>Total: $${total}</p>
+        <button onclick="removeProduct('${p.product._id}')">Eliminar ❌</button>
+      </div>
+      <hr>
+    `;
+  });
+
+  html += `<h3>Total general: $${grandTotal}</h3>`;
+  document.getElementById('mini-cart').innerHTML = html;
+  document.getElementById('cart-count').innerText = totalItems;
+}
+
+// Actualizar cantidad
+async function updateQuantity(productId, newQty) {
+  if (newQty < 1) return;
+  await fetch(`/api/carts/${cartId}/products/${productId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ quantity: newQty })
+  });
+  renderMiniCart();
+}
+
+// Eliminar producto
+async function removeProduct(productId) {
+  await fetch(`/api/carts/${cartId}/products/${productId}`, { method: "DELETE" });
+  renderMiniCart();
+}
+
+// Renderizar carrito al cargar la página
+window.addEventListener("DOMContentLoaded", renderMiniCart);
 </script>

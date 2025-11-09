@@ -1,15 +1,101 @@
-{{! Título principal del carrito }}
-<h1>Carrito</h1>
+<h1>🛒 Carrito</h1>
 
-{{! Recorro todos los productos que hay en el carrito }}
-{{#each cart.products}}
-  <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
-    {{! Muestro el nombre del producto }}
-    <h3>{{this.product.title}}</h3>
+<div id="cart-container">
+  {{#if cart.products.length}}
+    {{#each cart.products}}
+    <div class="product-item" data-price="{{this.product.price}}" data-id="{{this.product._id}}">
+      <h3>{{this.product.title}}</h3>
+      <p>💵 Precio unitario: ${{this.product.price}}</p>
 
-    {{! Cantidad que hay de este producto }}
-    <p>Cantidad: {{this.quantity}}</p>
-    {{! Precio del producto }}
-    <p>Precio: ${{this.product.price}}</p>
-  </div>
-{{/each}}
+      <label for="qty-{{this.product._id}}">Cantidad:</label>
+      <input 
+        type="number" 
+        id="qty-{{this.product._id}}" 
+        value="{{this.quantity}}" 
+        min="1" 
+        style="width: 60px; text-align: center;"
+      >
+
+      <p>Total: $<span class="product-total">{{multiply this.product.price this.quantity}}</span></p>
+
+      <button class="update-btn">Actualizar cantidad 🔄</button>
+      <button class="remove-btn">Eliminar ❌</button>
+      <hr>
+    </div>
+    {{/each}}
+  {{else}}
+    <p>🕳️ El carrito está vacío.</p>
+  {{/if}}
+</div>
+
+<h2>Total general: $<span id="grand-total">{{cart.totalGeneral}}</span></h2>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const cartId = "{{cart._id}}";
+
+    // 🧮 Recalcula totales del carrito
+    function updateTotals() {
+      let grandTotal = 0;
+      const items = document.querySelectorAll(".product-item");
+
+      items.forEach(item => {
+        const price = parseFloat(item.dataset.price);
+        let qty = parseInt(item.querySelector("input").value);
+        if (qty < 1 || isNaN(qty)) qty = 1; // Evita cantidades menores a 1
+        const total = price * qty;
+        item.querySelector(".product-total").innerText = total;
+        grandTotal += total;
+      });
+
+      document.getElementById("grand-total").innerText = grandTotal;
+
+      // Si se eliminaron todos los productos, muestro mensaje
+      if (items.length === 0) {
+        document.getElementById("cart-container").innerHTML = "<p>🕳️ El carrito está vacío.</p>";
+        document.getElementById("grand-total").innerText = "0";
+      }
+    }
+
+    // 🔁 Inicializo totales al cargar
+    updateTotals();
+
+    // 🔄 Actualizar cantidad
+    document.querySelectorAll(".update-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const item = btn.closest(".product-item");
+        const productId = item.dataset.id;
+        const quantity = parseInt(item.querySelector("input").value);
+
+        const res = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ quantity })
+        });
+
+        const data = await res.json();
+        alert(data.message || "Cantidad actualizada ✅");
+        updateTotals();
+      });
+    });
+
+    // ❌ Eliminar producto
+    document.querySelectorAll(".remove-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const item = btn.closest(".product-item");
+        const productId = item.dataset.id;
+
+        const res = await fetch(`/api/carts/${cartId}/products/${productId}`, { method: "DELETE" });
+        const data = await res.json();
+        alert(data.message || "Producto eliminado ✅");
+        item.remove();
+        updateTotals();
+      });
+    });
+
+    // 🧮 Actualizar totales al cambiar cantidad manualmente
+    document.querySelectorAll(".product-item input").forEach(input => {
+      input.addEventListener("input", updateTotals);
+    });
+  });
+</script>
