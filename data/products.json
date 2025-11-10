@@ -1,0 +1,46 @@
+[{
+  "_id": {
+    "$oid": "6910edd12b45b333a71a863a"
+  },
+  "title": "Mate Imperial",
+  "description": "Mate de calabaza forrado en cuero",
+  "price": 8500,
+  "category": "calabaza",
+  "status": true
+},
+{
+  "_id": {
+    "$oid": "69110876a2a8937bf0f77e91"
+  },
+  "title": "Mate de Madera",
+  "description": "Mate tradicional de madera",
+  "price": 5000,
+  "category": "madera",
+  "stock": 20,
+  "status": true,
+  "thumbnails": []
+},
+{
+  "_id": {
+    "$oid": "6911089da2a8937bf0f77e92"
+  },
+  "title": "Mate Imperial de Cuero",
+  "description": "Mate forrado en cuero premium, clásico de colección",
+  "price": 8500,
+  "category": "calabaza",
+  "stock": 15,
+  "status": true,
+  "thumbnails": []
+},
+{
+  "_id": {
+    "$oid": "691108afa2a8937bf0f77e93"
+  },
+  "title": "Mate de Cerámica Pintado",
+  "description": "Mate de cerámica con diseño pintado a mano",
+  "price": 6500,
+  "category": "ceramica",
+  "stock": 10,
+  "status": true,
+  "thumbnails": []
+}]
