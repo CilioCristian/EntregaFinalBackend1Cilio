@@ -1,82 +1,189 @@
 <h1 class="page-title">Lista de Productos</h1>
-<!-- Título de la página -->
+<!-- Acá muestro el título de la página, yo hago que el usuario sepa que está viendo la lista de productos -->
 
-<!-- Select para ordenar por precio -->
 <label for="sort">Ordenar por precio:</label>
-<select id="sort" onchange="sortProducts()">
+<select id="sort">
   <option value="">--Seleccione--</option>
   <option value="asc" {{#ifEquals selectedSort "asc"}}selected{{/ifEquals}}>Menor a Mayor</option>
   <option value="desc" {{#ifEquals selectedSort "desc"}}selected{{/ifEquals}}>Mayor a Menor</option>
-  <!-- Se mantiene la opción seleccionada según el valor de selectedSort -->
 </select>
+<!-- Acá se filtra por orden de precio, yo leo la opción seleccionada para ordenar los productos -->
 
-<!-- Select para filtrar por categoría -->
 <label for="category">Filtrar por categoría:</label>
-<select id="category" onchange="filterByCategory()">
+<select id="category">
   <option value="">--Todas--</option>
   <option value="madera" {{#ifEquals selectedCategory "madera"}}selected{{/ifEquals}}>Madera</option>
   <option value="calabaza" {{#ifEquals selectedCategory "calabaza"}}selected{{/ifEquals}}>Calabaza</option>
   <option value="ceramica" {{#ifEquals selectedCategory "ceramica"}}selected{{/ifEquals}}>Cerámica</option>
-  <!-- Se mantiene la opción seleccionada según selectedCategory -->
 </select>
+<!-- Acá se filtra por categoría, yo paso la categoría seleccionada para mostrar solo esos productos -->
 
-<div class="products-container">
+<div class="products-container" id="products-container">
   {{#each products}}
   <div class="product-item" data-id="{{this._id}}">
-    <!-- Cada producto guarda su id en un atributo data-id -->
     <h3>{{this.title}}</h3>
-    <!-- Nombre del producto -->
     <p>{{this.description}}</p>
-    <!-- Descripción del producto -->
     <p><b>Precio:</b> ${{this.price}}</p>
-    <!-- Precio del producto -->
-
     <a href="/products/{{this._id}}" class="btn-ver-mas">Ver más</a>
-    <!-- Enlace para ir al detalle del producto -->
-
-    <button onclick="addToCart('{{this._id}}')">Agregar al carrito</button>
-    <!-- Botón para agregar al carrito llamando a la función addToCart -->
+    <button class="add-to-cart-btn" data-id="{{this._id}}">Agregar al carrito</button>
   </div>
   {{/each}}
 </div>
+<!-- Acá recorro los productos, yo genero cada div con título, descripción, precio y los botones para ver más o agregar al carrito -->
 
-<!-- Paginación -->
-<div class="pagination">
-  {{#if hasPrevPage}}<a href="{{prevLink}}">Anterior</a>{{/if}}
+<div class="pagination" id="pagination">
+  {{#if hasPrevPage}}<a href="{{prevLink}}" class="page-link">Anterior</a>{{/if}}
   Página {{page}} de {{totalPages}}
-  {{#if hasNextPage}}<a href="{{nextLink}}">Siguiente</a>{{/if}}
-  <!-- Enlaces a página anterior y siguiente si existen, mostrando la página actual -->
+  {{#if hasNextPage}}<a href="{{nextLink}}" class="page-link">Siguiente</a>{{/if}}
 </div>
+<!-- Acá hago la paginación, yo muestro botones de anterior y siguiente si hay páginas, y el número de página actual -->
 
 <div id="mini-cart">
   <h2>Carrito (<span id="cart-count">0</span> items)</h2>
-  <!-- Contenedor del mini carrito que muestra la cantidad total de productos -->
 </div>
+<!-- Acá genero el mini carrito, yo muestro la cantidad de items que hay dentro -->
 
 <script>
-function sortProducts() {
+const cartId = "6910fd582b45b333a71a863b";
+// Acá guardo el ID del carrito, yo lo voy a usar para todas las llamadas al carrito
+
+let currentPage = 1;
+// Acá guardo la página actual, yo la uso para la paginación
+
+// ---------------- Funciones de carrito ----------------
+async function addToCart(productId) {
+  // Acá agrego un producto al carrito, yo envío la petición POST con la cantidad 1
+  await fetch(`/api/carts/${cartId}/products/${productId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ quantity: 1 })
+  });
+  renderMiniCart();
+  // Acá actualizo el mini carrito, yo vuelvo a mostrar los productos con sus cantidades
+}
+
+async function renderMiniCart() {
+  // Acá muestro los productos en el mini carrito, yo traigo el carrito completo del servidor
+  const res = await fetch(`/api/carts/${cartId}`);
+  const data = await res.json();
+  const cart = data.payload;
+  if (!cart || !cart.products) return;
+
+  let html = '';
+  let grandTotal = 0;
+  let totalItems = 0;
+
+  cart.products.forEach(p => {
+    const total = p.product.price * p.quantity;
+    grandTotal += total;
+    // Acá voy sumando el total general, yo calculo el monto total
+    totalItems += p.quantity;
+    // Acá voy sumando la cantidad de items, yo calculo cuántos productos hay en total
+
+    html += `
+      <div class="mini-cart-item" data-id="${p.product._id}">
+        <h4>${p.product.title}</h4>
+        <p>Precio unitario: $${p.product.price}</p>
+        <p>
+          Cantidad: 
+          <button onclick="updateQuantity('${p.product._id}', ${p.quantity - 1})">-</button>
+          ${p.quantity}
+          <button onclick="updateQuantity('${p.product._id}', ${p.quantity + 1})">+</button>
+        </p>
+        <p>Total: <b>$${total}</b></p>
+        <button class="remove-btn" onclick="removeProduct('${p.product._id}')">Eliminar</button>
+      </div>
+    `;
+    // Acá construyo cada producto en el mini carrito, yo pongo botones para subir/bajar cantidad y eliminar
+  });
+
+  html += `<h3 class="grand-total">Total general: $${grandTotal}</h3>`;
+  document.getElementById('mini-cart').innerHTML = html;
+  document.getElementById('cart-count').innerText = totalItems;
+  // Acá actualizo el HTML del mini carrito y el contador de items, yo reflejo los cambios en pantalla
+}
+
+async function updateQuantity(productId, newQty) {
+  // Acá cambio la cantidad de un producto en el carrito, yo envío la nueva cantidad al servidor
+  if (newQty < 1) return;
+  // Acá evito que la cantidad sea menor a 1, yo no dejo que el usuario tenga menos de un item
+  await fetch(`/api/carts/${cartId}/products/${productId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ quantity: newQty })
+  });
+  renderMiniCart();
+  // Acá actualizo el mini carrito, yo reflejo la nueva cantidad
+}
+
+async function removeProduct(productId) {
+  // Acá elimino un producto del carrito, yo envío la petición DELETE al servidor
+  await fetch(`/api/carts/${cartId}/products/${productId}`, { method: "DELETE" });
+  renderMiniCart();
+  // Acá vuelvo a renderizar el mini carrito, yo muestro los productos restantes
+}
+
+// ---------------- Funciones de filtrado, orden y paginación ----------------
+async function fetchProducts(page = 1) {
+  // Acá traigo los productos según página, categoría y orden, yo construyo la URL según los filtros
   const sortValue = document.getElementById("sort").value;
-  // Tomo el valor seleccionado en el select de orden
-  const url = new URL(window.location.href);
-  // Obtengo la URL actual
-  if (sortValue) url.searchParams.set("sort", sortValue);
-  // Si hay un valor, lo agrego a la query string
-  else url.searchParams.delete("sort");
-  // Si no hay valor, elimino el parámetro sort de la URL
-  window.location.href = url.toString();
-  // Recargo la página con la nueva URL
-}
-
-function filterByCategory() {
   const categoryValue = document.getElementById("category").value;
-  // Tomo el valor seleccionado en el select de categoría
-  const url = new URL(window.location.href);
-  if (categoryValue) url.searchParams.set("category", categoryValue);
-  else url.searchParams.delete("category");
-  window.location.href = url.toString();
-  // Recargo la página con la nueva URL según categoría
+  const url = `/api/products?limit=10&page=${page}${sortValue ? `&sort=${sortValue}` : ""}${categoryValue ? `&query=${categoryValue}` : ""}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+  renderProducts(data.payload, data.page, data.totalPages, data.hasPrevPage, data.hasNextPage);
+  // Acá llamo a renderProducts, yo muestro los productos en la página según los filtros
 }
 
-// Aquí va todo tu código de carrito (addToCart, renderMiniCart, etc.) igual que antes
-// Esto incluye funciones para agregar productos, actualizar cantidades, eliminar productos y renderizar el mini carrito
+function renderProducts(products, page, totalPages, hasPrevPage, hasNextPage) {
+  // Acá muestro los productos, yo limpio el contenedor y agrego cada producto nuevo
+  const container = document.getElementById("products-container");
+  container.innerHTML = "";
+
+  products.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "product-item";
+    div.dataset.id = p._id;
+    div.innerHTML = `
+      <h3>${p.title}</h3>
+      <p>${p.description}</p>
+      <p><b>Precio:</b> $${p.price}</p>
+      <a href="/products/${p._id}" class="btn-ver-mas">Ver más</a>
+      <button class="add-to-cart-btn" data-id="${p._id}">Agregar al carrito</button>
+    `;
+    container.appendChild(div);
+    // Acá agrego cada producto al contenedor, yo construyo el HTML dinámicamente
+  });
+
+  // Acá vuelvo a activar los botones de agregar al carrito, yo los conecto a la función addToCart
+  document.querySelectorAll(".add-to-cart-btn").forEach(btn => {
+    btn.addEventListener("click", () => addToCart(btn.dataset.id));
+  });
+
+  // Acá actualizo la paginación, yo pongo botones de anterior y siguiente según corresponda
+  const pagination = document.getElementById("pagination");
+  pagination.innerHTML = `
+    ${hasPrevPage ? `<button class="page-link" onclick="fetchProducts(${page-1})">Anterior</button>` : ""}
+    Página ${page} de ${totalPages}
+    ${hasNextPage ? `<button class="page-link" onclick="fetchProducts(${page+1})">Siguiente</button>` : ""}
+  `;
+
+  currentPage = page;
+  // Acá guardo la página actual, yo la uso para navegar entre páginas
+}
+
+// ---------------- Eventos ----------------
+document.getElementById("sort").addEventListener("change", () => fetchProducts(currentPage));
+// Acá detecto cuando el usuario cambia el orden, yo vuelvo a cargar los productos con la misma página
+
+document.getElementById("category").addEventListener("change", () => fetchProducts(1));
+// Acá detecto cuando el usuario filtra por categoría, yo reseteo la página a 1
+
+window.addEventListener("DOMContentLoaded", () => {
+  renderMiniCart();
+  // Acá muestro el mini carrito al cargar la página, yo actualizo los items visibles
+  fetchProducts(currentPage);
+  // Acá cargo los productos al inicio, yo lleno la página con los productos según filtros
+});
 </script>
