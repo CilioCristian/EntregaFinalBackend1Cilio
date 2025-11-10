@@ -128,7 +128,7 @@ async function fetchProducts(page = 1) {
   // Acá traigo los productos según página, categoría y orden, yo construyo la URL según los filtros
   const sortValue = document.getElementById("sort").value;
   const categoryValue = document.getElementById("category").value;
-  const url = `/api/products?limit=10&page=${page}${sortValue ? `&sort=${sortValue}` : ""}${categoryValue ? `&query=${categoryValue}` : ""}`;
+  const url = `/api/products?limit=10&page=${page}${sortValue ? `&sort=${sortValue}` : ""}${categoryValue ? `&category=${categoryValue}` : ""}`;
 
   const res = await fetch(url);
   const data = await res.json();
