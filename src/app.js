@@ -15,7 +15,13 @@ dotenv.config();
 
 const app = express();
 const PORT = 8080;
-
+const hbs = engine({
+  helpers: {
+    ifEquals: (arg1, arg2, options) => {
+      return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+    }
+  }
+});
 // --- Configuración de handlebars ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,3 +67,5 @@ app.listen(PORT, () => {
 
 app.use(express.static(path.join(__dirname, "public")));
 // Sirvo archivos estáticos (CSS, JS, imágenes) desde la carpeta public
+app.engine("handlebars", hbs);
+app.set("view engine", "handlebars");
