@@ -1,10 +1,19 @@
 <h1 class="page-title">Lista de Productos</h1>
 <!-- Muestro el título de la página de productos -->
 
+<!-- Select para ordenar por precio -->
+<label for="sort">Ordenar por precio:</label>
+<select id="sort" onchange="sortProducts()">
+  <option value="">--Seleccione--</option>
+  <option value="asc">Menor a Mayor</option>
+  <option value="desc">Mayor a Menor</option>
+</select>
+<!-- Creo un select para que el usuario pueda ordenar los productos por precio. Al cambiar, llamo a sortProducts() -->
+
 <div class="products-container">
   {{#each products}}
   <div class="product-item" data-id="{{this._id}}">
-    <!-- Cada producto guarda su id en un atributo data -->
+    <!-- Cada producto guarda su id en un atributo data para usarlo en JS -->
     <h3>{{this.title}}</h3>
     <!-- Muestro el nombre del producto -->
     <p>{{this.description}}</p>
@@ -14,11 +23,11 @@
 
     <!-- Botón Ver más -->
     <a href="/products/{{this._id}}" class="btn-ver-mas">Ver más</a>
-    <!-- Enlace para ir al detalle del producto -->
+    <!-- Enlace que lleva al detalle del producto -->
 
     <!-- Botón agregar al carrito -->
     <button onclick="addToCart('{{this._id}}')">Agregar al carrito</button>
-    <!-- Botón para agregar el producto al carrito llamando a la función addToCart -->
+    <!-- Llama a la función addToCart con el id del producto -->
   </div>
   {{/each}}
 </div>
@@ -28,7 +37,7 @@
   {{#if hasPrevPage}}<a href="{{prevLink}}">Anterior</a>{{/if}}
   Página {{page}} de {{totalPages}}
   {{#if hasNextPage}}<a href="{{nextLink}}">Siguiente</a>{{/if}}
-  <!-- Muestro enlaces a la página anterior y siguiente si existen, y la página actual -->
+  <!-- Muestro los enlaces de paginación si existen y la página actual -->
 </div>
 
 <div id="mini-cart">
@@ -38,7 +47,24 @@
 
 <script>
 const cartId = "6910fd582b45b333a71a863b";
-// Guardo el id del carrito para usarlo en las peticiones al servidor
+// Guardo el id del carrito para usar en las peticiones al servidor
+
+// Función para ordenar productos
+function sortProducts() {
+  const sortValue = document.getElementById("sort").value;
+  // Obtengo el valor seleccionado en el select
+  const url = new URL(window.location.href);
+  // Creo un objeto URL para manipular los parámetros
+  if (sortValue) {
+    url.searchParams.set("sort", sortValue);
+    // Si hay valor, lo agrego a los parámetros de la URL
+  } else {
+    url.searchParams.delete("sort");
+    // Si no hay valor, elimino el parámetro sort
+  }
+  window.location.href = url.toString();
+  // Redirijo a la misma página con la nueva URL, recargando la vista
+}
 
 // Función para agregar un producto al carrito
 async function addToCart(productId) {
@@ -47,9 +73,9 @@ async function addToCart(productId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ quantity: 1 })
   });
-  // Envío el producto con cantidad 1 al servidor
+  // Envío el producto al servidor con cantidad 1
   renderMiniCart();
-  // Vuelvo a renderizar el mini carrito para mostrar los cambios
+  // Vuelvo a renderizar el mini carrito para reflejar los cambios
 }
 
 // Función para renderizar el mini carrito
@@ -58,18 +84,18 @@ async function renderMiniCart() {
   const data = await res.json();
   const cart = data.payload;
   if (!cart || !cart.products) return;
-  // Obtengo el carrito del servidor y verifico que tenga productos
+  // Traigo el carrito desde el servidor y verifico que tenga productos
 
   let html = '';
   let grandTotal = 0;
   let totalItems = 0;
-  // Inicializo variables para el total general y la cantidad de productos
+  // Inicializo variables para total general y cantidad de items
 
   cart.products.forEach(p => {
     const total = p.product.price * p.quantity;
     grandTotal += total;
     totalItems += p.quantity;
-    // Calculo el total del producto y sumo al total general y al total de items
+    // Calculo el total de cada producto y sumo al total general y total de items
 
     html += `
       <div class="mini-cart-item" data-id="${p.product._id}">
@@ -85,13 +111,13 @@ async function renderMiniCart() {
         <button class="remove-btn" onclick="removeProduct('${p.product._id}')">Eliminar</button>
       </div>
     `;
-    // Construyo el HTML de cada producto del mini carrito, incluyendo botones para aumentar, disminuir o eliminar
+    // Construyo el HTML de cada producto del mini carrito con botones para actualizar o eliminar
   });
 
   html += `<h3 class="grand-total">Total general: $${grandTotal}</h3>`;
   document.getElementById('mini-cart').innerHTML = html;
   document.getElementById('cart-count').innerText = totalItems;
-  // Inserto el HTML en el mini carrito y actualizo la cantidad total de productos
+  // Inserto el HTML en el mini carrito y actualizo el contador de items
 }
 
 // Función para actualizar la cantidad de un producto
@@ -115,5 +141,5 @@ async function removeProduct(productId) {
 }
 
 window.addEventListener("DOMContentLoaded", renderMiniCart);
-// Al cargar la página, renderizo el mini carrito con los productos existentes
+// Cuando la página carga, renderizo el mini carrito con los productos existentes
 </script>
