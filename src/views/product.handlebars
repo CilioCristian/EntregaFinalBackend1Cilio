@@ -1,7 +1,17 @@
 <h1>{{product.title}}</h1>
+<!-- Muestro el título del producto -->
+
 <p>{{product.description}}</p>
+<!-- Muestro la descripción del producto -->
+
 <p><b>Precio:</b> ${{product.price}}</p>
+<!-- Muestro el precio del producto -->
+
 <p><b>Categoría:</b> {{product.category}}</p>
+<!-- Muestro la categoría a la que pertenece el producto -->
+
 <p><b>Disponible:</b> {{#if product.status}}Sí{{else}}No{{/if}}</p>
+<!-- Verifico si el producto está disponible y muestro "Sí" o "No" -->
 
 <button>Agregar al carrito</button>
+<!-- Botón para agregar el producto al carrito -->

@@ -1,43 +1,26 @@
-<h1 class="page-title">Lista de Productos</h1>
-<!-- Muestro el título de la página de productos -->
+<h1 class="page-title">{{product.title}}</h1>
+<!-- Muestro el título del producto -->
 
-<div class="products-container">
-  {{#each products}}
-  <div class="product-item" data-id="{{this._id}}">
-    <!-- Cada producto guarda su id en un atributo data -->
-    <h3>{{this.title}}</h3>
-    <!-- Muestro el nombre del producto -->
-    <p>{{this.description}}</p>
-    <!-- Muestro la descripción del producto -->
-    <p><b>Precio:</b> ${{this.price}}</p>
-    <!-- Muestro el precio del producto -->
-    
-    <!-- Botón Ver más -->
-    <a href="/products/{{this._id}}" class="btn-ver-mas">Ver más</a>
-    <!-- Enlace para ir al detalle del producto -->
-    
-    <!-- Botón agregar al carrito -->
-    <button onclick="addToCart('{{this._id}}')">Agregar al carrito</button>
-    <!-- Botón para agregar el producto al carrito llamando a la función addToCart -->
-  </div>
-  {{/each}}
-</div>
+<div class="product-detail-container">
+  <p><b>Descripción:</b> {{product.description}}</p>
+  <!-- Muestro la descripción del producto -->
+  <p><b>Precio:</b> ${{product.price}}</p>
+  <!-- Muestro el precio del producto -->
+  <p><b>Categoría:</b> {{product.category}}</p>
+  <!-- Muestro la categoría del producto -->
 
-<div class="pagination">
-  {{#if hasPrevPage}}<a href="{{prevLink}}">Anterior</a>{{/if}}
-  Página {{page}} de {{totalPages}}
-  {{#if hasNextPage}}<a href="{{nextLink}}">Siguiente</a>{{/if}}
-  <!-- Paginación: muestro enlaces a la página anterior y siguiente si existen, y la página actual -->
+  <button onclick="addToCart('{{product._id}}')">Agregar al carrito</button>
+  <!-- Botón para agregar el producto al carrito llamando a la función addToCart -->
 </div>
 
 <div id="mini-cart">
   <h2>Carrito (<span id="cart-count">0</span> items)</h2>
-  <!-- Contenedor del mini carrito que muestra la cantidad total de productos -->
+  <!-- Contenedor del mini carrito que muestra la cantidad total de items -->
 </div>
 
 <script>
 const cartId = "6910fd582b45b333a71a863b";
-// Guardo el id del carrito para usarlo en las peticiones al servidor
+// Guardo el id del carrito para usar en las peticiones al servidor
 
 // Función para agregar un producto al carrito
 async function addToCart(productId) {
@@ -48,7 +31,7 @@ async function addToCart(productId) {
   });
   // Envío el producto con cantidad 1 al servidor
   renderMiniCart();
-  // Vuelvo a renderizar el mini carrito para mostrar los cambios
+  // Vuelvo a renderizar el mini carrito con la información actualizada
 }
 
 // Función para renderizar el mini carrito
@@ -62,7 +45,7 @@ async function renderMiniCart() {
   let html = '';
   let grandTotal = 0;
   let totalItems = 0;
-  // Inicializo variables para el total general y la cantidad de productos
+  // Inicializo variables para el total general y la cantidad de items
 
   cart.products.forEach(p => {
     const total = p.product.price * p.quantity;
@@ -90,7 +73,7 @@ async function renderMiniCart() {
   html += `<h3 class="grand-total">Total general: $${grandTotal}</h3>`;
   document.getElementById('mini-cart').innerHTML = html;
   document.getElementById('cart-count').innerText = totalItems;
-  // Inserto el HTML en el mini carrito y actualizo la cantidad total de productos
+  // Inserto el HTML en el mini carrito y actualizo la cantidad total de items
 }
 
 // Función para actualizar la cantidad de un producto

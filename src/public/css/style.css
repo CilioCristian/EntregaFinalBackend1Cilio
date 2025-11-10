@@ -1,0 +1,131 @@
+/* ===== Estilos Generales ===== */
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+  color: #2c3e50;
+  margin: 0;
+  padding: 0;
+}
+
+.page-title {
+  text-align: center;
+  margin: 20px 0;
+}
+
+/* ===== Contenedor de Productos ===== */
+.products-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.product-item {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 15px;
+  max-width: 250px;
+  width: 100%;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+.product-item h3 {
+  margin-top: 0;
+}
+
+.product-item button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  background: #3498db;
+  color: white;
+  font-weight: bold;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.product-item button:hover {
+  background: #2980b9;
+}
+
+/* ===== Paginación ===== */
+.pagination {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.pagination a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #3498db;
+  font-weight: bold;
+}
+
+.pagination a:hover {
+  text-decoration: underline;
+}
+
+/* ===== Mini Carrito ===== */
+#mini-cart {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 300px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  padding: 15px;
+  z-index: 100;
+}
+
+#mini-cart h2 {
+  margin-top: 0;
+}
+
+.mini-cart-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 8px;
+  background: #f9f9f9;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mini-cart-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+}
+
+.mini-cart-item button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  margin-top: 5px;
+  transition: opacity 0.2s;
+}
+
+.mini-cart-item button:hover {
+  opacity: 0.8;
+}
+
+.mini-cart-item .remove-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.grand-total {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 1.1em;
+  font-weight: bold;
+}

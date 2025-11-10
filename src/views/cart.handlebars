@@ -1,11 +1,16 @@
-<h1>🛒 Carrito</h1>
+<h1>Carrito</h1>
+<!-- Muestro el título de la página del carrito -->
 
 <div id="cart-container">
   {{#if cart.products.length}}
+    <!-- Si el carrito tiene productos, los recorro -->
     {{#each cart.products}}
     <div class="product-item" data-price="{{this.product.price}}" data-id="{{this.product._id}}">
+      <!-- Cada producto guarda su precio y su id en atributos data -->
       <h3>{{this.product.title}}</h3>
-      <p>💵 Precio unitario: ${{this.product.price}}</p>
+      <!-- Muestro el nombre del producto -->
+      <p>Precio unitario: ${{this.product.price}}</p>
+      <!-- Muestro el precio unitario -->
 
       <label for="qty-{{this.product._id}}">Cantidad:</label>
       <input 
@@ -15,85 +20,104 @@
         min="1" 
         style="width: 60px; text-align: center;"
       >
+      <!-- Campo para que el usuario cambie la cantidad -->
 
       <p>Total: $<span class="product-total">{{multiply this.product.price this.quantity}}</span></p>
+      <!-- Muestro el total del producto (precio por cantidad) -->
 
-      <button class="update-btn">Actualizar cantidad 🔄</button>
-      <button class="remove-btn">Eliminar ❌</button>
+      <button class="update-btn">Actualizar cantidad</button>
+      <!-- Botón para actualizar la cantidad en el servidor -->
+      <button class="remove-btn">Eliminar</button>
+      <!-- Botón para eliminar el producto del carrito -->
       <hr>
     </div>
     {{/each}}
   {{else}}
-    <p>🕳️ El carrito está vacío.</p>
+    <p>El carrito está vacío.</p>
+    <!-- Si no hay productos, muestro mensaje de carrito vacío -->
   {{/if}}
 </div>
 
 <h2>Total general: $<span id="grand-total">{{cart.totalGeneral}}</span></h2>
+<!-- Muestro el total general del carrito -->
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const cartId = "{{cart._id}}";
+    // Guardo el id del carrito para usar en las peticiones al servidor
 
-    // 🧮 Recalcula totales del carrito
+    // Función para recalcular totales del carrito
     function updateTotals() {
       let grandTotal = 0;
       const items = document.querySelectorAll(".product-item");
+      // Tomo todos los productos del carrito
 
       items.forEach(item => {
         const price = parseFloat(item.dataset.price);
         let qty = parseInt(item.querySelector("input").value);
-        if (qty < 1 || isNaN(qty)) qty = 1; // Evita cantidades menores a 1
+        if (qty < 1 || isNaN(qty)) qty = 1; 
+        // Aseguro que la cantidad sea al menos 1
         const total = price * qty;
         item.querySelector(".product-total").innerText = total;
         grandTotal += total;
+        // Calculo el total del producto y sumo al total general
       });
 
       document.getElementById("grand-total").innerText = grandTotal;
+      // Actualizo el total general en la vista
 
-      // Si se eliminaron todos los productos, muestro mensaje
+      // Si no hay productos, muestro mensaje de carrito vacío y total en 0
       if (items.length === 0) {
-        document.getElementById("cart-container").innerHTML = "<p>🕳️ El carrito está vacío.</p>";
+        document.getElementById("cart-container").innerHTML = "<p>El carrito está vacío.</p>";
         document.getElementById("grand-total").innerText = "0";
       }
     }
 
-    // 🔁 Inicializo totales al cargar
+    // Inicializo totales al cargar la página
     updateTotals();
 
-    // 🔄 Actualizar cantidad
+    // Actualizar cantidad en el servidor
     document.querySelectorAll(".update-btn").forEach(btn => {
       btn.addEventListener("click", async () => {
         const item = btn.closest(".product-item");
         const productId = item.dataset.id;
         const quantity = parseInt(item.querySelector("input").value);
+        // Tomo la cantidad ingresada por el usuario
 
         const res = await fetch(`/api/carts/${cartId}/products/${productId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ quantity })
         });
+        // Envío la nueva cantidad al servidor
 
         const data = await res.json();
-        alert(data.message || "Cantidad actualizada ✅");
+        alert(data.message || "Cantidad actualizada");
+        // Muestro mensaje de confirmación
         updateTotals();
+        // Recalculo los totales después de actualizar
       });
     });
 
-    // ❌ Eliminar producto
+    // Eliminar producto del carrito
     document.querySelectorAll(".remove-btn").forEach(btn => {
       btn.addEventListener("click", async () => {
         const item = btn.closest(".product-item");
         const productId = item.dataset.id;
+        // Tomo el id del producto a eliminar
 
         const res = await fetch(`/api/carts/${cartId}/products/${productId}`, { method: "DELETE" });
         const data = await res.json();
-        alert(data.message || "Producto eliminado ✅");
+        alert(data.message || "Producto eliminado");
+        // Muestro mensaje de confirmación
         item.remove();
+        // Quito el producto de la vista
         updateTotals();
+        // Recalculo totales
       });
     });
 
-    // 🧮 Actualizar totales al cambiar cantidad manualmente
+    // Recalculo totales cuando el usuario cambia cantidad manualmente
     document.querySelectorAll(".product-item input").forEach(input => {
       input.addEventListener("input", updateTotals);
     });

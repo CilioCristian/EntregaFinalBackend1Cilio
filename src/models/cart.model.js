@@ -1,21 +1,21 @@
-// Importo mongoose, que me permite trabajar con MongoDB usando modelos y esquemas
+// Importo mongoose para poder crear esquemas y modelos y trabajar con MongoDB
 import mongoose from "mongoose";
 
-// Defino el esquema del carrito (cartSchema)
-// Cada carrito tiene un arreglo de productos
+// Defino el esquema del carrito
+// Cada carrito va a tener un arreglo de productos
 const cartSchema = new mongoose.Schema({
   products: [
     {
-      // "product" hace referencia al ID de un producto dentro de la colección "products"
+      // Guardo la referencia al producto mediante su ID en la colección "products"
       product: { type: mongoose.Schema.Types.ObjectId, ref: "products" },
 
-      // "quantity" indica la cantidad de ese producto en el carrito
-      // Si no se especifica, por defecto será 1
+      // Guardo la cantidad de este producto en el carrito
+      // Si no pongo cantidad, por defecto será 1
       quantity: { type: Number, default: 1 }
     }
   ]
 });
 
 // Exporto el modelo "CartModel"
-// Este modelo representa la colección "carts" en la base de datos
+// Con esto puedo interactuar con la colección "carts" en MongoDB
 export const CartModel = mongoose.model("carts", cartSchema);
