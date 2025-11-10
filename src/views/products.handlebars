@@ -11,11 +11,11 @@
     <!-- Muestro la descripción del producto -->
     <p><b>Precio:</b> ${{this.price}}</p>
     <!-- Muestro el precio del producto -->
-    
+
     <!-- Botón Ver más -->
     <a href="/products/{{this._id}}" class="btn-ver-mas">Ver más</a>
     <!-- Enlace para ir al detalle del producto -->
-    
+
     <!-- Botón agregar al carrito -->
     <button onclick="addToCart('{{this._id}}')">Agregar al carrito</button>
     <!-- Botón para agregar el producto al carrito llamando a la función addToCart -->
@@ -23,11 +23,12 @@
   {{/each}}
 </div>
 
+<!-- Paginación -->
 <div class="pagination">
   {{#if hasPrevPage}}<a href="{{prevLink}}">Anterior</a>{{/if}}
   Página {{page}} de {{totalPages}}
   {{#if hasNextPage}}<a href="{{nextLink}}">Siguiente</a>{{/if}}
-  <!-- Paginación: muestro enlaces a la página anterior y siguiente si existen, y la página actual -->
+  <!-- Muestro enlaces a la página anterior y siguiente si existen, y la página actual -->
 </div>
 
 <div id="mini-cart">

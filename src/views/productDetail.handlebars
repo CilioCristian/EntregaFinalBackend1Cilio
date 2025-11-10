@@ -9,8 +9,13 @@
   <p><b>Categoría:</b> {{product.category}}</p>
   <!-- Muestro la categoría del producto -->
 
+  <!-- Botón para agregar al carrito -->
   <button onclick="addToCart('{{product._id}}')">Agregar al carrito</button>
-  <!-- Botón para agregar el producto al carrito llamando a la función addToCart -->
+  <!-- Al hacer clic, llamo a la función addToCart enviando el id del producto -->
+
+  <!-- Botón para volver a la lista de productos -->
+  <a href="/products" class="btn-volver">Volver al Inicio</a>
+  <!-- Enlace que me lleva de vuelta a la vista de todos los productos -->
 </div>
 
 <div id="mini-cart">
@@ -20,7 +25,7 @@
 
 <script>
 const cartId = "6910fd582b45b333a71a863b";
-// Guardo el id del carrito para usar en las peticiones al servidor
+// Guardo el id del carrito para usarlo en las peticiones al servidor
 
 // Función para agregar un producto al carrito
 async function addToCart(productId) {
@@ -29,9 +34,9 @@ async function addToCart(productId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ quantity: 1 })
   });
-  // Envío el producto con cantidad 1 al servidor
+  // Envío el producto al servidor con cantidad 1
   renderMiniCart();
-  // Vuelvo a renderizar el mini carrito con la información actualizada
+  // Vuelvo a renderizar el mini carrito para reflejar los cambios
 }
 
 // Función para renderizar el mini carrito
@@ -40,18 +45,18 @@ async function renderMiniCart() {
   const data = await res.json();
   const cart = data.payload;
   if (!cart || !cart.products) return;
-  // Obtengo el carrito del servidor y verifico que tenga productos
+  // Traigo el carrito desde el servidor y verifico que tenga productos
 
   let html = '';
   let grandTotal = 0;
   let totalItems = 0;
-  // Inicializo variables para el total general y la cantidad de items
+  // Inicializo variables para el total general y la cantidad total de items
 
   cart.products.forEach(p => {
     const total = p.product.price * p.quantity;
     grandTotal += total;
     totalItems += p.quantity;
-    // Calculo el total del producto y sumo al total general y al total de items
+    // Calculo el total de cada producto y sumo al total general y al total de items
 
     html += `
       <div class="mini-cart-item" data-id="${p.product._id}">
@@ -73,7 +78,7 @@ async function renderMiniCart() {
   html += `<h3 class="grand-total">Total general: $${grandTotal}</h3>`;
   document.getElementById('mini-cart').innerHTML = html;
   document.getElementById('cart-count').innerText = totalItems;
-  // Inserto el HTML en el mini carrito y actualizo la cantidad total de items
+  // Inserto el HTML en el mini carrito y actualizo el contador de items
 }
 
 // Función para actualizar la cantidad de un producto
@@ -97,5 +102,5 @@ async function removeProduct(productId) {
 }
 
 window.addEventListener("DOMContentLoaded", renderMiniCart);
-// Al cargar la página, renderizo el mini carrito con los productos existentes
+// Cuando la página carga, renderizo el mini carrito con los productos existentes
 </script>
